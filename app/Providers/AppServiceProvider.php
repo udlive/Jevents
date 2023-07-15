@@ -12,13 +12,16 @@ class AppServiceProvider extends ServiceProvider
       *
       * @return void
       */
-      public function boot(UrlGenerator $url)
-      {
-              if (env('APP_ENV') !== 'local') {
-                    $url->forceScheme('https');
-              }
-       }
-            
+    public function boot()
+    {
+        //require app_path('Attendize/constants.php');
+        if(env('FORCE_HTTPS') == true)
+        {
+            $this->app['request']->server->set('HTTPS', true);
+        }
+
+    }
+              
     /**
      * Register any application services.
      *
