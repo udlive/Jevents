@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
+use App\Services\Firebase\FirebaseAuthenticationService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,10 @@ class AppServiceProvider extends ServiceProvider
         {
             $this->app['request']->server->set('HTTPS', true);
         }
+
+        $this->app->bind('App\Services\FirebaseAuthenticationService', function () {
+            return new FirebaseAuthenticationService();
+        });
 
     }
               

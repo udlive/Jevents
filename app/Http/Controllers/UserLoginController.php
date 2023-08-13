@@ -72,11 +72,31 @@ class UserLoginController extends Controller
             }
         }
 
-        if (Auth::attempt(['email' => $email, 'password' => $password], true) === false) {
-            return Redirect::back()
-                ->with(['message' => trans('Controllers.login_password_incorrect'), 'failed' => true])
-                ->withInput();
+        // Firebase Login Authenctication Start
+        try {
+            $this->firebaseAuth->loginUser($email, $password);
+            
+            if (Auth::attempt(['email' => $email, 'password' => $password], true) === false) {
+                return Redirect::back()
+                    ->with(['message' => trans('Controllers.login_password_incorrect'), 'failed' => true])
+                    ->withInput();
+            }
+            return redirect()->intended(route('showSelectOrganiser'));
+
+        } catch (\Exception $e) {
+            return back()->withErrors([
+                'email' => 'These credentials do not match our records.',
+            ]);
         }
-        return redirect()->intended(route('showSelectOrganiser'));
+
+        // Firebase Login Authentication  End
+
+
+        // if (Auth::attempt(['email' => $email, 'password' => $password], true) === false) {
+        //     return Redirect::back()
+        //         ->with(['message' => trans('Controllers.login_password_incorrect'), 'failed' => true])
+        //         ->withInput();
+        // }
+        // return redirect()->intended(route('showSelectOrganiser'));
     }
 }

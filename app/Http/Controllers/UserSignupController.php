@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Redirect;
+use App\Services\Firebase\FirebaseAuthenticationService;
 use App\Attendize\Utils;
 use App\Models\Account;
 use App\Models\User;
@@ -19,14 +20,17 @@ class UserSignupController extends Controller
 {
     protected $auth;
     protected $captchaService;
+    protected $firebaseAuth;
 
-    public function __construct(Guard $auth)
+
+    public function __construct(Guard $auth, FirebaseAuthenticationService $firebaseAuth)
     {
         if (Account::count() > 0 && !Utils::isAttendize()) {
             return redirect()->route('login')->send();
         }
 
         $this->auth = $auth;
+        $this->firebaseAuth = $firebaseAuth;
 
         $captchaConfig = config('attendize.captcha');
         if ($captchaConfig["captcha_is_on"]) {
@@ -60,6 +64,7 @@ class UserSignupController extends Controller
             'terms_agreed' => $is_attendize ? 'required' : ''
         ]);
 
+
         if (is_object($this->captchaService)) {
             if (!$this->captchaService->isHuman($request)) {
                 return Redirect::back()
@@ -67,6 +72,15 @@ class UserSignupController extends Controller
                     ->withInput();
             }
         }
+
+        // Firebase authentication start
+        $email = $request->input('email');
+        $password = $request->input('password');
+
+        $uid = $this->firebaseAuth->registerUser($email, $password);
+
+        // Firebase authentication end
+
 
         $account_data = $request->only(['email', 'first_name', 'last_name']);
         $account_data['currency_id'] = config('attendize.default_currency');

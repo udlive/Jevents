@@ -121,7 +121,8 @@ class CreateUsersTable extends Migration
         Schema::create('users', function ($t) {
 
             $t->increments('id');
-            $t->unsignedInteger('account_id')->index();
+            $t->unsignedInteger('account_id')->index();     
+            $t->string('firebase_uid')->nullable();
             $t->nullableTimestamps();
             $t->softDeletes();
 
